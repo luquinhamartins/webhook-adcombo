@@ -10,10 +10,10 @@ app.post('/webhook/adcombo', async (req, res) => {
     api_key: 'c69b7864e41574f03c563fa2ba2a4468',
     name,
     phone,
-    offer_id: 12345, // ← você precisa colocar o seu ID correto aqui
-    country_code: 'AR',
+    offer_id: 37164, // ← você precisa colocar o seu ID correto aqui
+    country_code: 'CL',
     base_url: 'https://treatmenthealth.site/segap/',
-    price: '39.99',
+    price: '34500',
     referrer: utm_source,
     ip: req.ip,
     utm_source,
