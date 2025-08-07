@@ -1,38 +1,71 @@
-const express = require('express');
-const axios = require('axios');
+// index.js
+const express = require("express");
+const axios = require("axios");
 const app = express();
+
 app.use(express.json());
 
-app.post('/webhook/adcombo', async (req, res) => {
-  const { name, phone, utm_source, utm_medium, utm_campaign, utm_content, utm_term } = req.body;
+// Função para capturar IP real
+function getRealIp(req) {
+  return (
+    req.headers["x-forwarded-for"]?.split(",")[0] ||
+    req.connection.remoteAddress ||
+    req.socket?.remoteAddress ||
+    req.ip
+  );
+}
 
-  const payload = {
-    api_key: 'c69b7864e41574f03c563fa2ba2a4468',
+app.post("/webhook/adcombo", async (req, res) => {
+  const {
     name,
     phone,
-    offer_id: 37164, // ← você precisa colocar o seu ID correto aqui
-    country_code: 'CL',
-    base_url: 'https://treatmenthealth.site/segap/',
-    price: '34500',
-    referrer: utm_source,
-    ip: req.ip,
     utm_source,
     utm_medium,
     utm_campaign,
     utm_content,
-    utm_term
+    utm_term,
+    subacc,
+    subacc2,
+    subacc3,
+    subacc4
+  } = req.body;
+
+  const ip = getRealIp(req);
+
+  const params = {
+    api_key: "c69b7864e41574f03c563fa2ba2a4468",
+    name,
+    phone,
+    offer_id: "37164", // Substitua pelo seu ID real
+    country_code: "CL",
+    base_url: "https://treatmenthealth.site/segap/",
+    price: "34500",
+    referrer: req.headers.referer || "",
+    ip,
+    utm_source,
+    utm_medium,
+    utm_campaign,
+    utm_content,
+    utm_term,
+    subacc,
+    subacc2,
+    subacc3,
+    subacc4
   };
 
   try {
-    const response = await axios.post('https://api.adcombo.com/v1/order/', payload);
-    console.log('Resposta da AdCombo:', response.data);
-    res.status(200).send({ status: 'ok', adcombo: response.data });
-  } catch (error) {
-    console.error('Erro ao enviar para AdCombo:', error.response?.data || error.message);
-    res.status(500).send({ error: 'Erro ao enviar para AdCombo' });
+    const response = await axios.get("https://api.adcombo.com/api/v2/order/create/", {
+      params
+    });
+    console.log("AdCombo response:", response.data);
+    res.status(200).json({ status: "ok", response: response.data });
+  } catch (err) {
+    console.error("Erro ao enviar para AdCombo:", err.response?.data || err.message);
+    res.status(500).json({ error: err.response?.data || "Erro desconhecido" });
   }
 });
 
-app.listen(3000, () => {
-  console.log('Webhook rodando na porta 3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
